@@ -61,59 +61,102 @@ Also, you will need an editor; I use [vs code](https://code.visualstudio.com/); 
 - Install `yarm`
   `npm install -g yarn`
 
-# Frappe framework tutorial
+### Install bench CLI
 
-This will be a example proyect inspire on the `tutorial` of the [frappe docs](https://frappeframework.com/docs)
+- Use the `pip3` command to install the `frappe-bench` package
+  `pip3 install frappe-bench`
+- Make sure that is correct installed using checking the version
+  `bench --version`
 
-### Pre-requisites
+Now we are all set up, to begin with, the tutorial
+
+## Some inside on the example
+
+This will be the same example as shown on the [frappe tutorial section](https://frappeframework.com/docs/user/en/tutorial) where we are going to now a little bit of the `frappe` framework that is based on `python` and `MariaDB` with `jinja` for the templates.
+
+For example, a `library manage system` will be building when a `librarian` can manage `articles` and `memberships`. We will have the following models:
+
+- `Article`: A book o something similar item that can be rented
+- `Library member`: `User` that can have a `membership`
+- `Library transaction`: Get or return an `article`
+- `Library Membership`: An active `member` of the `library`
+- `Library settings`: Setting values of the action that will have with the `article`
+
+The `Librarian` will have its own `admin` part that came by default on the `frappe` framework called `Desk`.
+
+Source: https://frappeframework.com/docs/user/en/tutorial#what-are-we-building
+Useful links to practice all parts of the `frappe` framework: https://frappeframework.com/docs/user/en/tutorial/prerequisites
+
+## Setup a bench project
+
+To continue with this section you need to follow the `Installation` section first.
+
+- Go to your terminal and make sure you have `bench` installed using
+  `bench --version`
+- Now on your terminal; go where you want to place the project
+- Run the `bench init` command putting the name of the project
+  `bench init my_project`
+  This will create a directory call it by the name that you put as `my_project` and will do the following:
+  - Create a `python virtual environment`. A `virtual environment` is an isolated runtime`environment that allows`users` and applications to install and upgrade packages without interfering with the behavior of other` python` application running on the same system
+  - Fetch and install the `frappe` app as a` python` package
+  - Install `node modules` of` frappe`
+  - Build the static assets
+
+Source: https://frappeframework.com/docs/user/en/tutorial/install-and-setup-bench#create-the-frappe-bench-directory
+
+### Directory structure
 
 ```bash
-  Python 3.6+
-  Node.js 12
-  Redis 5                                       (caching and realtime updates)
-  MariaDB 10.3.x / Postgres 9.5.x               (to run database driven apps)
-  yarn 1.12+                                    (js dependency manager)
-  pip 20+                                       (py dependency manager)
-  wkhtmltopdf (version 0.12.5 with patched qt)  (for pdf generation)
-  cron                                          (bench scheduled jobs: automated certificate renewal, scheduled backups)
-  NGINX                                         (proxying multitenant sites in production)
+.
+├── Procfile
+├── apps
+│   └── frappe
+├── config
+│   ├── pids
+│   ├── redis_cache.conf
+│   ├── redis_queue.conf
+│   └── redis_socketio.conf
+├── env
+│   ├── bin
+│   ├── include
+│   ├── lib
+│   └── share
+├── logs
+│   ├── backup.log
+│   └── bench.log
+└── sites
+    ├── apps.txt
+    ├── assets
+    └── common_site_config.json
 ```
 
-### Installation process(pre-requisites, macOs)
+- `env`: `Python` virtual environment
+- `config`: Config files for [Redis](https://redis.io/) and [Nginx](https://www.nginx.com/)
+- `logs`: Log files for every process
+- `sites`: Site directory
+  - `assets`: Static assets that will be server
+  - `app.txt`: List of installed `frappe` apps
+  - `commonsiteconfig.json`: Site config that is available for all sites
+- `apps`: Apps directory
+  - `frappe`: The `frappe` app directory
+- `Procfile`: List of processes that run in development
 
-- Install [Homebrew](https://brew.sh/)
-- Use `homebrew` to install `python`, `git`, `redis`, `mariadb`
-  `brew install python git redis mariadb`
+source: https://frappeframework.com/docs/user/en/tutorial/install-and-setup-bench#directory-structure
 
-  If you got an error with the permissions with the `brew link` step follow [this post](https://gist.github.com/dalegaspi/7d336944041f31466c0f9c7a17f7d601)
+### Start your bench server
 
-- Install `wkhtmltopdf` using [cask](https://github.com/Homebrew/homebrew-cask)
-  `brew install --cask wkhtmltopdf`
-- Use the `nano` command to update the `my.cnf` file
-  `nano /usr/local/etc/my.cnf`
+To check if everything goes as expected on the installation process we will need to start our development server(created on the previous section) so let get into it:
 
-  If this path doesn't work use the following command to check the correct path:
-  `mysql --help | grep "Default options" -A 1`
+- On your terminal; go to the directory that was created in the previous section
+- Use the `bench start` command to start your development server
+- You should see the logs on the terminal without any errors
 
-- Add the following to `my.cnf` file
+These steps will start several processes as you see on the logs of the terminal like:
 
-  ```bash
-  character-set-client-handshake = FALSE
-  character-set-server = utf8mb4
-  collation-server = utf8mb4_unicode_ci
+- Run a `python` web server based on [gunicorn](https://gunicorn.org/)
+- A `redis` server for caching
+- A job queuing and `sockectio` pub-sub
+- Background workers
+- A `node` server for `socketio` and for compiling `js` and `css` files
 
-  [mysql]
-  default-character-set = utf8mb4
-  ```
-
-- Restart the `mysql` service using `brew`
-  `brew services restart mariadb`
-- Install [Nodejs](https://nodejs.org/en/)
-- Instal [nvm](https://github.com/nvm-sh/nvm) to manage the `node` versions
-  `curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash`
-- Use the `12` version of `node`
-  `nvm install 12`
-- Check the `node` version to make sure you have the `12`
-  `node -v`
-- Install `yarm`
-  `npm install -g yarn`
+Finally the dev server will be running on port `8000` but sadly we don't have any site yet so you will have a `404` error on your browser

@@ -54,3 +54,20 @@ This will be a example project inspire on the `tutorial` of the [frappe docs](ht
   `node -v`
 - Install `yarm`
   `npm install -g yarn`
+
+### Install bench CLI
+
+- Use the `pip3` command to install the `frappe-bench` package
+  `pip3 install frappe-bench`
+- Make sure that is correct installed using checking the version
+  `bench --version`
+
+## Run this example locally
+
+Here are the steps to run this example locally
+### Creating the frappe directory
+
+- On your terminal go to thee path that you want to store this directory
+- Use the `bench init` command with the name oof your project
+    `bench init name_of_the_project`
+- A directory with the name that you specify before will be created
