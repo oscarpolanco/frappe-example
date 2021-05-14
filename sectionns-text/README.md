@@ -160,3 +160,70 @@ These steps will start several processes as you see on the logs of the terminal 
 - A `node` server for `socketio` and for compiling `js` and `css` files
 
 Finally the dev server will be running on port `8000` but sadly we don't have any site yet so you will have a `404` error on your browser
+
+### Creating an app
+
+Now we will be creating an `app` that is a `python` package that uses the `frappe` framework. The default `app` is `frappe` that is created by the `bench init` command and acts as the framework for all `apps`.
+
+All `apps` should have an entry on the `apps.txt` file that is located on the `sites` directory. This will be done automated using the `bench` command that we will see next.
+
+- On your terminal; `frappe` project directory
+- Use the `bench new-app` command
+  `bench new-app my_custom_app`
+- Fill in the options that will print on your terminal
+- You should see that a new directory with the name that you use on the `bench new-app` command is created
+- Now this is the files that you are going to track on `GitHub`
+- Go with your terminal to your new `app` directory and you will see that the app `git` by default
+- App your `remote` repository to `fetch` and `pull`
+  `git remote add my_repo_clone_url`
+- Use the `-v` option to see that the `remote` URL is correctly added
+  `git remote -v`
+- You should see the correct `remote` URL for `pull` and `fetch`
+
+#### Directory structure
+
+```bash
+apps/my_custom_app
+├── MANIFEST.in
+├── README.md
+├── my_custom_app
+│   ├── __init__.py
+│   ├── config
+│   │   ├── __init__.py
+│   │   ├── desktop.py
+│   │   └── docs.py
+│   ├── my_custom_app
+│   │   └── __init__.py
+│   ├── hooks.py
+│   ├── modules.txt
+│   ├── patches.txt
+│   ├── public
+│   │   ├── css
+│   │   └── js
+│   ├── templates
+│   │   ├── __init__.py
+│   │   └── includes
+│   └── www
+├── custom_app.egg-info
+│   ├── PKG-INFO
+│   ├── SOURCES.txt
+│   ├── dependency_links.txt
+│   ├── not-zip-safe
+│   ├── requires.txt
+│   └── top_level.txt
+├── license.txt
+├── requirements.txt
+├── package.json
+└── setup.py
+```
+
+- `requirements.txt`: List of `python` dependencies
+- `package.json`: List of `node` dependencies
+- `my_custom_app`(inside of the main `my_custom_app` directory): Store the source files
+- `my_custom_app/my_custom_app`: When you create a new `app` a new module with the same name will be created
+- `my_custom_app/hooks.py`: File that store the [hooks](https://frappeframework.com/docs/user/en/python-api/hooks) that override the standard behavior of `frappe`
+- `my_custom_app/module.txt`: The `frappe` app is organized on modules and every [Doctype](https://frappeframework.com/docs/user/en/basics/doctypes#module) is part of a module and these are listed on this file
+- `my_custom_app/patches.txt`: This file contains a reference to the `patches` that run on every [database migration](https://frappeframework.com/docs/user/en/database-migrations#data-migrations)
+- `my_custom_app/public`: This is the static folder that can be served by `nginx` on production. Files in this directory can be access via the `/assets/my_custom_app/**/*`
+- `my_custom_app/templates`: Store the `jinja` templates
+- `my_custom_app/www`: Files in this directory will be directly mapped to [portal pages](https://frappeframework.com/docs/user/en/portal-pages) that match the directory structure

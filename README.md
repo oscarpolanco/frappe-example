@@ -67,7 +67,14 @@ This will be a example project inspire on the `tutorial` of the [frappe docs](ht
 Here are the steps to run this example locally
 ### Creating the frappe directory
 
-- On your terminal go to thee path that you want to store this directory
-- Use the `bench init` command with the name oof your project
+- On your terminal go to the path that you want to store this directory
+- Use the `bench init` command with the name of your project
     `bench init name_of_the_project`
 - A directory with the name that you specify before will be created
+
+### Add the app to the frappe project
+
+- On your terminal; go to the `apps` directory
+- Use the `clone` command to get this repository
+  `git clone git@github.com:oscarpolanco/frappe_example.git`
+- You should have a `frappe_example` directory that is our custom `app`
