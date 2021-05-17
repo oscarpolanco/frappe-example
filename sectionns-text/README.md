@@ -227,3 +227,82 @@ apps/my_custom_app
 - `my_custom_app/public`: This is the static folder that can be served by `nginx` on production. Files in this directory can be access via the `/assets/my_custom_app/**/*`
 - `my_custom_app/templates`: Store the `jinja` templates
 - `my_custom_app/www`: Files in this directory will be directly mapped to [portal pages](https://frappeframework.com/docs/user/en/portal-pages) that match the directory structure
+
+## Creating a site
+
+`Frappe` is a multitenant platform and each tenant is called `site`. A `site` has its own database and exists on the `sites` directory.
+
+The `sites` directory contains some other files that came by default when you create the `frappe` project such as:
+
+- `apps.txt`: List of `apps` of `frappe`. The `apps` should be listed here before you can install a `site`(later we will show how to install a `site`). The `apps` add automatically when you run the `get-app` or `new-app` commands
+- `common_site_config.json`: [Configurations](https://frappeframework.com/docs/user/en/basics/site_config) that can be used on all `sites` can be put on this file
+- `asset`: Statics files that are required to the server on the browser
+
+Source: https://frappeframework.com/docs/user/en/basics/sites
+
+### Creating your new site
+
+- On your terminal; go to the `frappe` project
+- Use the `new-site` command to create a `site`
+  `bench new-site name.of.your.site`
+- Since this command will create a database for your `site` it will ask you the `MySQL` root password(The `brew` installation create a user that you can access on the terminal just using `mysql` so you will need to add the `root` password)
+- A new directory should be created on the `sites` folder with the same name as the one that you use on the `new-site` command
+- Now on the root directory run the `start` command
+- Go to http://localhost:8000/
+- You should be redirected to the `login` page(Don't log just yet we will do another thing first this is just for a test that everything goes as expected)
+
+### Site Directory Structure
+
+After running the `new-site` command you should have the following file structure on your `sites` directory
+
+```bash
+sites/mysite.local
+├── locks
+├── private
+│   ├── backups
+│   └── files
+├── public
+│   └── files
+├── site_config.json
+└── task-logs
+```
+
+- `lock`: Directory to synchronize various jobs using [file locking](https://en.wikipedia.org/wiki/File_locking)
+- `private`: Directory that contains files that are required on the authentication access and a database backup
+- `pubic`: Contains the files that can be accessed without login
+- `site_config.json`: File that contains a specific `site configuration`. The `site configuration` exist on every site directory and its value is available in the `frappe.conf` local variable
+
+source: https://frappeframework.com/docs/user/en/basics/sites
+
+### Access the site on your browser
+
+`Frappe` allows you to create multiple `sites` and access them separately on the same port(This is call multi-tenancy) but all `sites` on the same `url` you can't do that so we will need to follow the next process to run each `site` on it own `url`
+
+- On your terminal; go to the `frappe` project root
+- Delete the `currentsite.txt` file on the `sites` directory(When you do this you won't be able to access http://localhost:8000 anymore)
+  `rm sites/currentsite.txt`
+- Now we need to associate the `localhost` with the `site` that you created and `bench` have the command to do this
+  `bench --site name.of.your.site add-to-hosts`
+- Now On the root of the `frappe` project run the `start` command
+- Go to `http://name.of.your.site:8000`
+- You should be redirected to the login page(Don't log in just yet we will finish soon)
+
+### Install your app on the site
+
+Now we need to install the `app` that you created before on our running site.
+
+- On your terminal; go to the `frappe` project root
+- Use the following command to install your `app` in the running `site`
+  `bench --site name.of.your.site install-app my_custom_app`
+- Verify the installed `apps` using the following command:
+  `bench --site name.of.your.site list-apps`
+  You will see a `frappe app` and is fine; this `app` came by default on the `frappe` installation
+
+### Login to Desk
+
+Now that you all set and done we can finally login to `desk`
+
+- On your terminal; run the `start` command
+- Go to `http://name.of.your.site:8000`
+- You should be redirected to the `login` page
+- Fill the `login` form and submit(The default user is `Administrator` and the `password` is the one that you specify when you created the `site`)

@@ -65,16 +65,33 @@ This will be a example project inspire on the `tutorial` of the [frappe docs](ht
 ## Run this example locally
 
 Here are the steps to run this example locally
+
 ### Creating the frappe directory
 
 - On your terminal go to the path that you want to store this directory
 - Use the `bench init` command with the name of your project
-    `bench init name_of_the_project`
+  `bench init name_of_the_project`
 - A directory with the name that you specify before will be created
 
 ### Add the app to the frappe project
 
-- On your terminal; go to the `apps` directory
-- Use the `clone` command to get this repository
-  `git clone git@github.com:oscarpolanco/frappe_example.git`
+- On your terminal; go to the root of the `frappe` project that you just added before
+- Use the `get-app` to get the `app` that we create on this example
+  `bench get-app frappe_example git@github.com:oscarpolanco/frappe_example.git`
 - You should have a `frappe_example` directory that is our custom `app`
+
+### Create your site for the custom app and run the project
+
+- On your terminal; go to the root of the `frappe` project that you just added before
+- Use the `new-site` command to create your new `site`
+  `bench new-site name.of.your.site`
+- Since a database is created you will need to type your `mysql` password
+- Add your `admin` password
+- You should see that a new directory is created on the `sites` folder with the same name that you use on the `new-site` command
+- Install our custom `app` on your `site` using the following command
+  `bench --site name.of.your.site install-app frappe_example`
+- On the root of the `frappe` project run the `start` command
+  `bench start`
+- On your browser go to `http://localhost:8000/`
+- You should be redirected to the `login` page
+- Log in with the `admin` user(the default user is `Administrator` and the password is the one that you defined when you created the new `site`)
