@@ -306,3 +306,80 @@ Now that you all set and done we can finally login to `desk`
 - Go to `http://name.of.your.site:8000`
 - You should be redirected to the `login` page
 - Fill the `login` form and submit(The default user is `Administrator` and the `password` is the one that you specify when you created the `site`)
+
+## DocType
+
+The `doctype` describes the `model` and the `view` of your data. It contains what fields are stored for your data and how they will behave respect to each other. It enable a `ORM` and when you create a new `docType` a `JSON` object will be create on your `app` directory.
+
+Before we begin to create our custom `docTypes` we will need to enable the development mode that will create a boilerplate for the creation of the new `docTypes` and we can track then into version control in the `app` directory. So follow this steps to be in the development mode:
+
+- On your terminal; go to the root of the `frappe` project
+- Use the following command
+  `bench --site name.of.your.site set-config --global developer_mode 1`
+
+Source:
+
+- https://frappeframework.com/docs/user/en/basics/doctypes
+- https://frappeframework.com/docs/user/en/tutorial/create-a-doctype
+
+### Creating a docType
+
+Now we are going to create our first `docType` for our `library` project and we follow the next steps to do it:
+
+- On your terminal; go to the root of the `frappe` project
+- Use the `start` command to run your local server
+  `bench start`
+- On your browser; go to the `login` page
+- Login with the `admin` user
+- On the `Shortcuts` section click on the `DocType` options
+- You will see a list of all `docTypes` that you have available(This are `docTypes` that are created by default when you created your `app`)
+- Click on the `Add DocType` button
+- You will see the `New DocType` form
+- Add `Article` as the `docType` name and click on the `Module` input to see a dropdown
+- On the dropdown choose the name of your custom `app`
+- Now get to the `Fields` section and click `Add Row`
+- Put `Article Name` as the label and `Data` as its `type`
+- Add the following `fields` using the same process as the `Article Name`
+  <!-- prettier-ignore-start -->
+
+  |    Label    |     Type     |     Options      |
+  | :---------: | :----------: | :--------------: |
+  |    Image    | Attach Image |                  |
+  | Description | Text Editor  |                  |
+  |    ISBN     |     Data     |                  |
+  |   Status    |    Select    | Issue, Available |
+  |  Publisher  |     Data     |                  |
+
+  <!-- prettier-ignore-end -->
+
+- Click on the `Save` button at the top below the navbar
+- You should redirect to the `Article docType` page
+- Click on the `Go to Article List` button at the top
+- You should be redirected to the `Article` list page(But at this moment we don't have any `Articles`)
+- Now we need to clean the `cache` so click on the `refresh` button at the top
+- Now Click on the `Create your first Article` button
+- You should see a form that represents the `Article`
+- Fill the inputs with some test information and click on the `Save` button at the top
+- The `Article` should be created without any issues
+
+Source: https://frappeframework.com/docs/user/en/tutorial/create-a-doctype
+
+### What happened when we created the Article docType?
+
+- First; on the database a table called `tabArticle` was created with the `fields` that we specified before. You can check this navigating into `MariaDB` using the terminal and `bench` have some commands that can help us:
+  - On your terminal; go to the root of the `frappe` project
+  - Use the following command to get into the `MariaDB` console
+    `bench --site name.of.your.site mariadb`
+  - On the `MariaDB` console type the following
+    `desc tabArticle;`
+    This will show you all the `fields` of the `tabArticle`. You will see all the `fields` that you created plus some that are created by default with every `docType`. Something important is that the `name field` will be the `primary key` column
+  - Now use the following to see the record that you created before
+    `select * from tabArticle;`
+    This will `select` all `articles` that you created before but we just got one entry so it will show one. As you see the `name field` have the same content that you saw as the `name` of the `article` in the `admin`
+- Then; a number of views were also created for the `doctype` like the `list view` that will have the `list` of all `articles` and the `form view` that will `create` new `article` or `view` an existing one
+- Also; the `form layout` of the inputs are created according to the `fields` that you created before when you create the `article docType`
+- Finally; you will see that on the `apps/my_custom_app` there are a bunch of new files added to your custom `app`. These files describe everything about the new `docType` on which you can see:
+  - `article.json`: `JSON` file that define the `docTypes` attributes
+  - `article.js`: `Client-side` controller for the `form view`
+  - `article.py`: `Python` controller for `articles`
+  - `test_article.py`: `Python` unit test boilerplate
