@@ -383,3 +383,82 @@ Source: https://frappeframework.com/docs/user/en/tutorial/create-a-doctype
   - `article.js`: `Client-side` controller for the `form view`
   - `article.py`: `Python` controller for `articles`
   - `test_article.py`: `Python` unit test boilerplate
+
+Source: https://frappeframework.com/docs/user/en/tutorial/create-a-doctype
+
+### DocType features
+
+At this moment we can begin to customize the `article docType` that we created before so we can have a better experience using the UI.
+
+### Naming
+
+As you may notice the `names` on the `articles` that you created before are just a random `hash` generated automatically but we actually want the actual `article name` to be presented. Here is the step to do that:
+
+- On your terminal; go to the root of the `frappe` project and start your local server using:
+  `bench start`
+- Go to the `login` page on your browser and access it with your account
+- Click on the `DocType` button in the `Shortcut` section
+- Choose the `Article docType`
+- Scroll down to the `Naming` section
+- On the `Auto Name` input add the following:
+  `field:article_name`
+  This will use the data of the `article name` field
+- Click on the `save` button
+- Click on the `Go to Article List` button at the top
+- Create a new `article` and save it(Make sure that you fill the `article name` input)
+- You should see that the new `article` on the list use the `article name field` data
+
+Source: https://frappeframework.com/docs/user/en/tutorial/doctype-features
+
+### Form Layout
+
+Now we are going to make changes to the spacing of the `form view` of the `articles`
+
+- Go to the `Article docType`
+- Scroll to the `fields` section
+- Click on the `Add Row` button
+- Click on the `type` of the new column and choose `Column Break`(make sure that the label is empty)
+- Move the new column below the `Article Name`
+- Move the `Author` and `ISBN` rows to be before the `Column Break`
+- Click on the `Add Row` button
+- Click on `type` of the new row and choose `Section Break`
+- Move the `Description` bellow of the `Section Break` row
+- Click on the Save button
+- Go to the `Article` list and choose an `article`
+- You should see that the layout of the `form view` change and the `Author` and `ISBN` are on the same `column` and the `publisher` and `status` on the other. Also, the `Description` is in another `section`
+
+Source: https://frappeframework.com/docs/user/en/tutorial/doctype-features
+
+### Form settings
+
+Now we want to show the `image` at the top left of the `form view` and activate the `rename` option for this file.
+
+- Go to the `Article docType`
+- Scroll down to the `Form Settings` section
+- On the `Image Field` input add `image`(Name of the `field` that we created before)
+- On the checkboxes at the left choose the `Allow Rename`
+- Click the save button
+- Go to the `article` list and choose one of the `articles`
+- You should see the `image` to the top left of the `form view`
+- Click on the `...` button
+- You should see a `rename` option
+
+### Permission
+
+Finally; we are going to create some `roles` that restrict some functionality of a `docType` in this case the `Article` that we created before.
+
+- Go to the `Article docType`
+- Scroll down to the `Permission Rules` section
+- Click on `Add Row`
+- On the `Role` field add `Librarian`
+- A dropdown should popup
+- Choose the `Create new role` option
+- Click save
+- Leave all mark check
+- Follow the same steps to create a `Library Member role`
+- Just leave the `Read` check on that new `role`
+- Click on the Save button
+
+### Note:
+
+All those changes that we did will be reflected on the `article.json` file inside of the `doctype` directory so after performing all those changes you will need to commit those changes
