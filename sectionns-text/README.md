@@ -462,3 +462,54 @@ Finally; we are going to create some `roles` that restrict some functionality of
 ### Note:
 
 All those changes that we did will be reflected on the `article.json` file inside of the `doctype` directory so after performing all those changes you will need to commit those changes
+
+## Controller methods
+
+A `controller` is a normal `python` class that extends from `frappe.model.Document` and it handles how the values load from the database, how they are parsed and save back to the database.
+
+In this section, we will create a new `doctype` to add one little function as an example of a `controller` so let get to it!!
+
+- On your terminal; go to the root of the `frappe` project
+- Use the `start` command to run your local server(Remember that you need to be on development mode to create a new `doctype`)
+- On your browser go to the `login` page
+- Login with your `admin` account
+- On the `Shortcut` section choose `DocType`
+- Click on the `Add DocType` button
+- On the `Name` input add `Library Member`
+- Click on the `Module` input
+- A dropdown should popup
+- Choose your `app`
+- Scroll down to the `Fields` section
+- Add the following rows:
+  <!-- prettier-ignore-start -->
+
+  |     Label     | Type |
+  | :-----------: | :--: |
+  |  First Name   | Data |
+  |   Last Name   | Data |
+  |   Full Name   | Data |
+  | Email Address | Data |
+  |     Phone     | Data |
+
+  <!-- prettier-ignore-end -->
+
+  On the `Full Name field`; click on the `edit` button and scroll to the `Permission` checkbox and check `Read Only`
+
+- Click the save button
+- Go to the `Library Member` list
+- Click on the `refresh` button at the top
+- Click on the `Create your first List Member`
+- You will see that the `Full Name field` is not on the form. This is because is a `read-only field`
+- Now go to your editor
+- On your `app` directory inside of the `doctype` folder should be a new `library_member` directory
+- Go to the `library_member.py` file inside of the `library_member` directory
+- Delete `pass`
+- Add the following function
+  ```python
+  class LibraryMember(Document):
+    def before_save(self):
+      self.full_name = f'{self.first_name} {self.last_name or ""}'
+  ```
+  We use the `before_save` method that will run every time a document is saved, you can see more on these hooks on [this page](https://frappeframework.com/docs/user/en/basics/doctypes/controllers), and the function will fill the `full_name field` with the concatenation of the `first_name` and `last_name`
+- Go back to the `Library Member` list and create a new `Library Member`
+- You should create the `Library Member` without issue and will see the `full name field` with the correct information
