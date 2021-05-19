@@ -928,3 +928,39 @@ The `portal pages` are server-rendered pages for your website visitors. To this 
 - Also you should see a `See on Website` link below the `article` name
 - Click on the `See on Website` link
 - You should be redirected to the page with the `article` information
+
+Now if you go to the `article doctype` directory you will see a new folder call `templates` and have 2 files `article.html` and `article_row.html`; the first one is for individuals `articles` and the second is for the list of all `articles`.
+
+We are going to update the `article.html` first:
+
+- Delete the `h1`
+- Add the following code (`Frappe` use `bootstrap 4` by default)
+
+  ```html
+  {% extends "templates/web.html" %} {% block page_content %}
+
+  <div class="py-20 row">
+    <div class="col-sm-2">
+      <img src="{{ image }}" alt="{{ title }}" />
+    </div>
+    <div class="col">
+      <h1>{{ title }}</h1>
+      <p class="lead">By {{ author }}</p>
+      <div>
+        {%- if status == 'Available' -%}
+        <span class="badge badge-success">Available</span>
+        {%- elif status == 'Issue' -%}
+        <span class="badge badge-primary">Issued</span>
+        {%- endif -%}
+      </div>
+      <div class="mt-4">
+        <div>Publisher: <strong>{{ publisher }}</strong></div>
+        <div>ISBN: <strong>{{ isbn }}</strong></div>
+      </div>
+      <p>{{ description }}</p>
+    </div>
+  </div>
+  {% endblock %}
+  ```
+
+  Here you will see that we add a different structure for the page but we don't actually create all pages we only create a block of it. The complete page is on `web.html` that has a code that of the complete page and place the code of the block that we built at this moment we achieve this with the `extends` line. Then we defined the block and the name will be `page_content` inside of it we add the structure. Inside of the block, we begin to add the elements with the `bootstrap` classes getting the data provided by `Desk`(To get each `field` we use `{{ name_of_the_field }}`) and some of `jinja` functions to get the output that we want
