@@ -964,3 +964,19 @@ We are going to update the `article.html` first:
   ```
 
   Here you will see that we add a different structure for the page but we don't actually create all pages we only create a block of it. The complete page is on `web.html` that has a code that of the complete page and place the code of the block that we built at this moment we achieve this with the `extends` line. Then we defined the block and the name will be `page_content` inside of it we add the structure. Inside of the block, we begin to add the elements with the `bootstrap` classes getting the data provided by `Desk`(To get each `field` we use `{{ name_of_the_field }}`) and some of `jinja` functions to get the output that we want
+
+Now by default `frappe` create some more `portal views` for you and one of them is the `list view` that in our case you can access with just `/articles/` on the url and we already have the file related to that view that is the `article_row.html`. So lets add the following:
+
+```html
+<div class="py-8 row">
+  <div class="col-sm-1">
+    <img src="{{ doc.image}}" alt="{{ doc.name}}" />
+  </div>
+  <div class="col">
+    <a class="font-size-lg" href="{{ doc.route }}">{{ doc.name }}</a>
+    <p class="text-muted">By {{ doc.author }}</p>
+  </div>
+</div>
+```
+
+Test the list page for the `articles`
