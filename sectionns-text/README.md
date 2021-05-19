@@ -905,3 +905,78 @@ Let's create a little example for our custom `app`. Imagine that you create a `m
 Sources:
 https://frappeframework.com/docs/user/en/tutorial/form-scripts
 https://frappeframework.com/docs/user/en/api/form
+
+## Portal pages
+
+The `portal pages` are server-rendered pages for your website visitors. To this moment we only use the `admin` pages(Desk) to do what we need but those views should be only accessible for some specific users no the public in general so we use the `portal pages` to achieve this. Let's use the `article doctype` to do a little example:
+
+- On your terminal; go to the root of the `frappe` project and start your local server
+- On your browser go to the login page and log in as an `admin` user
+- On the `Shortcut` section click on `DocType`
+- Choose `Article`
+- Scroll down to the `Web view` section
+- Check the `Has Web View` option
+- A `Allow Guest to View` option should appear(Check that as well)
+- Go to the `Fields` section
+- Click on the `Add Row` button
+- Add a row call `Route` and put it before the `Section break`
+- Click on the Save button at the top
+- Then click on the `Go to Article list` button
+- Click on the `Add Article` button at the top
+- Fill the form and save(Leave the `Route` input blank)
+- You should see that the `article` is created without issue and the `Route` input automatically fill
+- Also you should see a `See on Website` link below the `article` name
+- Click on the `See on Website` link
+- You should be redirected to the page with the `article` information
+
+Now if you go to the `article doctype` directory you will see a new folder call `templates` and have 2 files `article.html` and `article_row.html`; the first one is for individuals `articles` and the second is for the list of all `articles`.
+
+We are going to update the `article.html` first:
+
+- Delete the `h1`
+- Add the following code (`Frappe` use `bootstrap 4` by default)
+
+  ```html
+  {% extends "templates/web.html" %} {% block page_content %}
+
+  <div class="py-20 row">
+    <div class="col-sm-2">
+      <img src="{{ image }}" alt="{{ title }}" />
+    </div>
+    <div class="col">
+      <h1>{{ title }}</h1>
+      <p class="lead">By {{ author }}</p>
+      <div>
+        {%- if status == 'Available' -%}
+        <span class="badge badge-success">Available</span>
+        {%- elif status == 'Issue' -%}
+        <span class="badge badge-primary">Issued</span>
+        {%- endif -%}
+      </div>
+      <div class="mt-4">
+        <div>Publisher: <strong>{{ publisher }}</strong></div>
+        <div>ISBN: <strong>{{ isbn }}</strong></div>
+      </div>
+      <p>{{ description }}</p>
+    </div>
+  </div>
+  {% endblock %}
+  ```
+
+  Here you will see that we add a different structure for the page but we don't actually create all pages we only create a block of it. The complete page is on `web.html` that has a code that of the complete page and place the code of the block that we built at this moment we achieve this with the `extends` line. Then we defined the block and the name will be `page_content` inside of it we add the structure. Inside of the block, we begin to add the elements with the `bootstrap` classes getting the data provided by `Desk`(To get each `field` we use `{{ name_of_the_field }}`) and some of `jinja` functions to get the output that we want
+
+Now by default `frappe` create some more `portal views` for you and one of them is the `list view` that in our case you can access with just `/articles/` on the url and we already have the file related to that view that is the `article_row.html`. So lets add the following:
+
+```html
+<div class="py-8 row">
+  <div class="col-sm-1">
+    <img src="{{ doc.image}}" alt="{{ doc.name}}" />
+  </div>
+  <div class="col">
+    <a class="font-size-lg" href="{{ doc.route }}">{{ doc.name }}</a>
+    <p class="text-muted">By {{ doc.author }}</p>
+  </div>
+</div>
+```
+
+Test the list page for the `articles`
