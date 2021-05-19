@@ -840,3 +840,68 @@ Now we will make some `validations` function that use the `library settings` val
   Here as we did before we are going to obtain the `max_articles field` from `Library Settings` then we will `count` how many `articles` the current `member` have the type `Issue` and finally compare if we have more `Issue articles` that the maximum that we can have
 
 Now test the conditions that you just saw for the `transactions` on the `admin`.
+
+## Form scripts
+
+A `form script` lets you add client-side logic on the `form views` to automatically fetch values, add validations and add contextual actions.
+
+When you create a new `doctype` a `js` file with will be created on the `doctype` directory with the same name of that `doctype`. You will have some to add your code using the following syntax:
+
+```js
+frappe.ui.form.on(doctype, {
+  event1() {
+    // handle event 1
+  },
+  event2() {
+    // handle event 2
+  },
+});
+```
+
+[Here](https://frappeframework.com/docs/user/en/api/form) you have some more deep information about `form scripts`.
+
+Let's create a little example for our custom `app`. Imagine that you create a `member` then you will need a `membership` for that `member` so you will need to go first; to the `member` list to create it; then to the `membership` list to create it and if you want to add a `transaction` you will need to follow the same steps and that are a lot of steps that a user follows but we can make it a little easier using `form scripts`.
+
+- On your editor; go to your custom `app` directory
+- In there go to the `doctype/library_member/` directory and open the `library_member.js`
+- On that file; uncomment the `refresh` function
+- Add the following
+  ```js
+  frappe.ui.form.on('Library Member', {
+    refresh: function (frm) {
+      frm.add_custom_button('Create Membership', () => {
+        frappe.new_doc('Library Membership', {
+          library_member: frm.doc.name,
+        });
+      });
+    },
+  });
+  ```
+  We use the `add_custom_button` of the `frm` object to create a button with the message `Create Membership` and send a callback function that using the `frappe.new_doc` method create a new `Library Membership` instantce sending the current `member` name
+- Now we will do the same with the `transaction`
+  ```js
+  frappe.ui.form.on('Library Member', {
+    refresh: function (frm) {
+      frm.add_custom_button('Create Membership', () => {
+        frappe.new_doc('Library Membership', {
+          library_member: frm.doc.name,
+        });
+      });
+      frm.add_custom_button('Create Transaction', () => {
+        frappe.new_doc('Library Transaction', {
+          library_member: frm.doc.name,
+        });
+      });
+    },
+  });
+  ```
+- On your terminal; go to the root of the `frappe` project and start your local server
+- Go to the login page and log in as an `admin`
+- Go to the `member` list page
+- Choose one of the `members` that you already created
+- You will see 2 buttons at the top right one for creating `membership` and the other for creating `transaction`
+- Click on both buttons and you will see that you are redirected to the respective `form view` page with the name of the `member` put automatically on the name input
+
+Sources:
+https://frappeframework.com/docs/user/en/tutorial/form-scripts
+https://frappeframework.com/docs/user/en/api/form
