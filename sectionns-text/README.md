@@ -513,3 +513,330 @@ In this section, we will create a new `doctype` to add one little function as an
   We use the `before_save` method that will run every time a document is saved, you can see more on these hooks on [this page](https://frappeframework.com/docs/user/en/basics/doctypes/controllers), and the function will fill the `full_name field` with the concatenation of the `first_name` and `last_name`
 - Go back to the `Library Member` list and create a new `Library Member`
 - You should create the `Library Member` without issue and will see the `full name field` with the correct information
+
+## Types of DocTypes
+
+Now we are going to check different `docType` that can be used on `frappe` and some more logic to validate the data that we use on the different `controllers` of the `docTypes`.
+
+### Linked DocTypes
+
+The `linked docTypes` are the ones that are linked to other `docTypes` with `link fields`. We can classify into 2 types are `master` and `transitional` based on the type of data that will store; for example, the `Article` and `Library Member` are `master docTypes` because they represent an entity. We don't have any `transitional doctype` yet but we will work on some beginning on this section like the `Library Membership` that will the data related to the `membership` of a previously created `member` so its data will depend on the `Library Member docType` that is why is `transitional`.
+
+Source: https://frappeframework.com/docs/user/en/tutorial/types-of-doctype#linked-doctypes
+
+### Submittable DocType
+
+Before continuing to creating the actual example of this `docTypes` we need to continue checking some definitions like the `submittable DocType` that is considered like this when you enable the option `Is Submittable` and this will enable 3 states on the `docType`:
+
+- `Draft`: This state will allow you to continue updating the document
+- `Submitted`: When you `submit` the document any `field` cannot be change
+- `Cancelled`: After `submitting` a document you can `cancel` it that will make invalid that document but won't delete it
+
+When you create a `submittable DocType` on the `fields` section you will see that an extra `field` is created `Amended From` automatically and this `field` is take action when you `cancel` a document from that moment that document can only be `amended` that means that it can be duplicated and the `cancel` document will be related to the new one via this `field`
+
+### Creating the Library Membership docType and add validation to it controller
+
+- On your terminal; go to the root of the `frappe` project and run your local server
+- On your browser; go to the `login` page
+- Login with a valid `admin` user
+- On the `Shortcut` section; choose the `DocType` option
+- Click on the `Add DocType` button at the top
+- On the `Name` input add `Library Membership`
+- Click on the `Module` input
+- A dropdown should popup
+- Choose your `app`
+- Click the `Is Submittable` checkbox that is below the `Module` input. This will make the `Library Membership` a `submittable DocType`
+- Scroll to the `fields` section
+- Add the following `fields`
+  <!-- prettier-ignore-start -->
+
+  |     Label      | Type  | Mandatory |    Options     |                                 Edit                                 |
+  | :------------: | :---: | :-------: | :------------: | :------------------------------------------------------------------: |
+  | Library Member | Link  |     ✔     | Library Member |                                                                      |
+  |   Full Name    | Data  |           |                | Check Read Only, Fetch form textarea add: `library_member.full_name` |
+  |   From Date    | Date  |           |                |                                                                      |
+  |    To Date     | Date  |           |                |                                                                      |
+  |      Paid      | Check |           |                |                                                                      |
+
+  <!-- prettier-ignore-end -->
+
+- On the `Naming` section put `LMS.#####` to the `Auto Name` input. Putting the `auto name` this way you `name` of each entry will have the `LMS` prefix and the `#` will be replaced by numbers that will begin in `000001` for the first entry and will increment itself on every new entry
+- Go to the `View Settings` section and on the `Title Field` put `full_name`
+- Go to the `Permission` section and add the `Librarian` role
+- Click on the Save button at the top
+
+As you can see the `Library Member` is similar to a `foreign key` on other frameworks and it will let you link the value to a record of another `docType`. Also the `Full Name field` is fetched from the `Library Member docType`.
+
+- Go to the `Library Membership` list
+- Click on the `Create your first library membership` button
+- Click on the `Library Member` input
+- A dropdown with some `Library Members` should popup(If you don't have any go a create one)
+- Choose one of them
+- You should see that the `Full Name` input fill itself
+- Fill the other `fields` and click save
+- You will see that the document is on `draft` mode
+- Click the `submit` button and you should see that the entry is added without errors
+
+#### Controller validation for the membership
+
+Now we will be adding some code to make sure that whoever is added to a `membership` doesn't have an active one yet.
+
+- On your editor; go to the `apps/my_custom_app/` directory on the `frappe` project
+- In the `doctype/library_membership` directory; open the `library_membership.py` file
+- Uncomment the `import frappe` line
+- Delete `pass` on the `LibraryMembership` class
+- Add a function call `before_submit` that recive `self`
+  ```python
+  class LibraryMembership(Document):
+    def before_submit(self):
+  ```
+  The `before_submit` method as we mentioned before is a hook that will run before we `submit` the data of our document
+- Create a variable call `exists` that it value will be `exists` method from `frappe.db`
+  ```python
+  class LibraryMembership(Document):
+    def before_submit(self):
+      exists = frappe.db.exists()
+  ```
+  The `exists` method is a filter provided by `frappe` that will help us to determinine if a specific entry exists
+- Add the following as parameters of the `exists` filter
+  ```python
+  class LibraryMembership(Document):
+    def before_submit(self):
+      exists = frappe.db.exists(
+        "Library Membership",
+        {
+          "library_member": self.library_member,
+          "docstatus": 1,
+          "to_date": (">", self.from_date),
+        },
+      )
+  ```
+  This will use the data of the `Library Membership docType` and search for the current `member` that you are trying to make the new `membership`; making sure that the document exists and the `date` is bigger than the current `date` that you are using
+- Add an `if` that check if the `exists` variable has a value and if it does throw a message for the user
+
+  ```python
+  class LibraryMembership(Document):
+    def before_submit(self):
+      exists = frappe.db.exists(
+        "Library Membership",
+        {
+          "library_member": self.library_member,
+          "docstatus": 1,
+          "to_date": (">", self.from_date),
+        },
+      )
+
+      if exists:
+        frappe.throw("There is an active membership for this member")
+  ```
+
+- Now go back to the `Library Membership` on your browser and try to do a `membership` for a `member` that already have one
+- You should see a modal with the message that you added before on the `controller`
+
+### Library transaction docType and validation
+
+At this moment we can begin to work with a `docType` that represents the `transaction` that will record that is `issue` or `return` of an `article` by a `member`.
+
+- On your terminal; go to the root of the `frappe` project and start your local server
+- Go to the login page and log in as `Administrator`
+- On the `shortcut` section; choose `DocType`
+- Click on the `Add DocType` button
+- On the `name` input add `Library Transaction`
+- Click on the `Module` input
+- You should see a dropdown popup
+- Choose your `app`
+- Check the `Is Submittable` checkbox
+- Co to the `Fields` section and add the following
+  <!-- prettier-ignore-start -->
+
+  |     Label      |  Type  |      Name      | Mandatory |    Options     |
+  | :------------: | :----: | :------------: | :-------: | :------------: |
+  |    Article     |  Link  |    Article     |     ✔     |    Article     |
+  | Library Member |  Link  | library_member |     ✔     | Library Member |
+  |      Type      | Select |      type      |     ✔     |  Issue Return  |
+  |      Date      |  Date  |      date      |           |                |
+
+  <!-- prettier-ignore-end -->
+
+- Go to the `Naming` section and add in the `Auto Name` input `LT.#####`
+- Go to the `Permission` section and add the `Librarian` role
+- Click on the Save button at the top
+
+#### Validation for the transaction
+
+Now we will continue adding some validations that will set the `articles` status depending on the `transaction` and we will control if the one that makes the `transaction` is a valid member also depending on the status of that `article` we will permit that the `transaction` continue
+
+- On your editor; go to the `apps/my_custom_app/doctype/library_transaction/` directory
+- Open the `library_transaction.py`
+- Uncomment the `import frappe`
+- Add the `before_submit` method
+  ```python
+  class LibraryTransaction(Document):
+    def before_submit(self):
+  ```
+- Add the following condition for the `transaction` that have the `type` equals to `Issue`
+  ```python
+  class LibraryTransaction(Document):
+    def before_submit(self):
+      if self.type == "Issue":
+        self.validate_issue()
+        article = frappe.get_doc("Article", self.article)
+        article.status = "Issue"
+        article.save()
+  ```
+  This condition will catch every `transaction` that have the `type Issue` and will run the `validate_issue`(We will make this function in a bit) that will check if the `article` is not `issued` by another member them if it not `issued` we will get the `article` and change its status to `Issue` and will `save` the update
+- Now add another condition for the `Return type` with the following content
+
+  ```python
+  class LibraryTransaction(Document):
+    def before_submit(self):
+      if self.type == "Issue":
+        self.validate_issue()
+        article = frappe.get_doc("Article", self.article)
+        article.status = "Issue"
+        article.save()
+
+      elif self.type == "Return":
+        self.validate_return()
+        article = frappe.get_doc("Article", self.article)
+        article.status = "Available"
+        article.save()
+  ```
+
+  This condition will check if the `transaction` has the `Return type` and if it does it will run the `validate_return`(we will make this function in a little bit) that will check if the `article` already have the `Available` status that means that we can't return something that is not being `issued` before then if it doesn't have the `available` status will get the actual `article` and set it status as `Available` and finally `save` the update
+
+- Then we can begin with the `validate` functions. First with the `validate_issue` function
+
+  ```python
+  class LibraryTransaction(Document):
+    def before_submit(self):
+      if self.type == "Issue":
+        ...
+
+      elif self.type == "Return":
+        ...
+
+      def validate_issue(self):
+        self.validate_membership()
+        article = frappe.get_doc("Article", self.article)
+        if article.status == "Issue":
+          frappe.throw("Article is already issued by another member")
+  ```
+
+  Here we will run the `validate_membership`(We will make this function in a bit) to know if the one that is issuing a `transaction` has a valid `membership` and if it does we get the actual `article` and check if the status is `Issue` throwing a message if the `article` is already been issue by another `member`
+
+- Now create a `validate_return` function with the following
+
+  ```python
+  class LibraryTransaction(Document):
+    def before_submit(self):
+      if self.type == "Issue":
+        ...
+
+      elif self.type == "Return":
+        ...
+
+      def validate_issue(self):
+        ...
+
+      def validate_return(self):
+        article = frappe.get_doc("Article", self.article)
+        if article.status == "Available":
+          frappe.throw("Article cannot be returned without being issued first")
+  ```
+
+  For this function, we will check the status of the `article` to see if is `Available` that will mean that we can't continue with the `transaction`
+
+- Finally, make the `validate_membership` function with the following
+
+  ```python
+  class LibraryTransaction(Document):
+    def before_submit(self):
+      if self.type == "Issue":
+        ...
+
+      elif self.type == "Return":
+        ...
+
+      def validate_issue(self):
+        ...
+
+      def validate_return(self):
+        ...
+
+      def validate_membership(self):
+        valid_membership = frappe.db.exists(
+          "Library Membership",
+          {
+            "library_member": self.library_member,
+            "docstatus": 1,
+            "from_date": ("<", self.date),
+            "to_date": (">", self.date),
+            },
+          )
+
+        if not valid_membership:
+          frappe.throw("The member does not have a valid membership")
+  ```
+
+  As we did before we will check if is an actual `member` that is issuing the `transaction`
+
+Now that you are aware of the different conditions of the `transaction` so try to test creating different `transactions` that match all cases.
+
+### Single DocTypes
+
+A `single doctype` is like a single record of data; it will not create a table on the database; it will store all single values on a table called `tabSingle` that is usually used for global settings. In our case, we will create a `single doctype` to control the maximum time that a `loan` should last and the maximum of `articles` that a `member` can `issue`.
+
+#### Creating the library settings doctype
+
+- On your terminal; go to the root of the `frappe` project and start your local server
+- On your browser; go to the login page and log in to the `admin` user
+- On the `Shortcut` section choose `DocType`
+- Click on the `Add DocType` button
+- On the `Name` input add `Library Settings`
+- Click on the `Module` input and a dropdown should popup
+- Choose your `app`
+- Check the `Is Single` checkbox below the `module` input
+- Scroll to the `Fields` section and add the following
+  <!-- prettier-ignore-start -->
+
+  |               Label               | Type |     Name     |
+  | :-------------------------------: | :--: | :----------: |
+  |            Loan Period            | Int  |              |
+  | Maximum Number of Issued Articles | Int  | max_articles |
+
+  <!-- prettier-ignore-end -->
+
+- Click on the Save button at the top
+- Now click on the `Go to library settings` button at the top
+- Now you should see only the `form view` of the `library settings` not a list. Add the values that you want and save
+- The values should be added without any errors
+
+#### Validation for library settings
+
+Now we will make some `validations` function that use the `library settings` values to prevent some `transactions` and to automatically add the `to_date field` of the `membership` on submission
+
+- On your `apps` directory; go to the `library_membership.py`
+- At the bottom of the `before_submit` method add the following
+  ```python
+  loan_period = frappe.db.get_single_value("Library Settings", "loan_period")
+  	self.to_date = frappe.utils.add_days(self.from_date, loan_period or 30)
+  ```
+  We will use the `get_single_value` method to obtain the `loan_period` of the `Library Settings` and assign it to the `loan_period` variable then use the `add_days` to calculate the `date` for the `to_date field` using the `from_date field` and the `loan_period` or `30` days. This will automatically put the `date` on `submit`
+- Go to the `Library Membership` list and add a new entry(Do not fill the `to_date` input) and submit
+- The `to_date field` should be fill when you submit the data
+- Now get back to your editor and go to the `library_transaction.py`
+- On the `before_submit` method create a new function call `validate_maximum_limit` with the following content
+  ```python
+  def validate_maximum_limit(self):
+  	max_articles = frappe.db.get_single_value("Library Settings", "max_articles")
+  	count = frappe.db.count(
+  		"Library Transaction",
+  		{"library_member": self.library_member, "type": "Issue", "docstatus": 1},
+  	)
+  	if count >= max_articles:
+  		frappe.throw("Maximum limit reached for issuing articles")
+  ```
+  Here as we did before we are going to obtain the `max_articles field` from `Library Settings` then we will `count` how many `articles` the current `member` have the type `Issue` and finally compare if we have more `Issue articles` that the maximum that we can have
+
+Now test the conditions that you just saw for the `transactions` on the `admin`.
